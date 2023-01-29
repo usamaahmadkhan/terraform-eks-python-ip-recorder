@@ -1,11 +1,12 @@
-.PHONY: default build builder-image binary-image test stop clean-images clean push apply deploy release release-all manifest push clean-image
+.PHONY: default login build push build-push apply purge deploy manifests bump-chart run infra-up infra-down
 
-REGISTRY ?= 217104054449.dkr.ecr.us-east-1.amazonaws.com
+REGISTRY ?= 217104054449.dkr.ecr.us-east-1.amazonaws.com  # cd terragrunt/infra/ecr; terragrunt output repository_url
 DOCKER_IMAGE ?= ip-recorder
+NAMESPACE = ip-recorder
 
 # Default value "dev"
-VERSION ?= 0.0.1
-REPOSITORY_DOCKER_TAG = ${REGISTRY}/${DOCKER_IMAGE}:${VERSION}
+VERSION ?= 0.0.2
+REPOSITORY_DOCKER_TAG = ${REGISTRY}/${DOCKER_IMAGE}:v${VERSION}
 
 
 login:
@@ -17,21 +18,32 @@ build:
 push:
 	docker push ${REPOSITORY_DOCKER_TAG}
 
-build-push: build push
+# Push to Registry
+build-push: login build push
 
+# Apply on live cluster
 apply:
-	kubectl create ns temp-ip-recorder || kubectl kubectl apply -f deployments/manifests/ -n temp-ip-recorder
+	kubectl create ns ${NAMESPACE} || true
+	kubectl apply -f deployments/all-in-one/ip-recorder.yaml -n ${NAMESPACE}
 
+# Purge from live cluster
+purge:
+	kubectl delete -f deployments/all-in-one/ip-recorder.yaml -n ${NAMESPACE}
+
+# Deploy
 deploy: push apply
 
+# Prepare manifests
 manifests: bump-chart
-	helm template --release-name ip-recorder deployments/chart/ip-recorder/ > deployments/all-in-one/ip-recorder.yaml
+	helm template --namespace ${NAMESPACE} --release-name ip-recorder deployments/chart/ip-recorder/ > deployments/all-in-one/ip-recorder.yaml
 
+# Bump Version
 bump-chart:
-	sed -i "s/^version:.*/version: v$(VERSION)/" deployments/chart/ip-recorder/Chart.yaml
-	sed -i "s/version:.*/version: v$(VERSION)/" deployments/chart/ip-recorder/values.yaml 
-	sed -i "s/^appVersion:.*/appVersion: v$(VERSION)/" deployments/chart/ip-recorder/Chart.yaml
-	sed -i "s/tag:.*/tag: v$(VERSION)/" deployments/chart/ip-recorder/values.yaml
+	sed -i "s/^version:.*/version: v${VERSION}/" deployments/chart/ip-recorder/Chart.yaml
+	sed -i "s/version:.*/version: v${VERSION}/" deployments/chart/ip-recorder/values.yaml 
+	sed -i "s/^appVersion:.*/appVersion: v${VERSION}/" deployments/chart/ip-recorder/Chart.yaml
+	sed -i "s/tag:.*/tag: v${VERSION}/" deployments/chart/ip-recorder/values.yaml
 
+# Run locally
 run:
 	docker-compose up --build

@@ -1,6 +1,6 @@
 locals {
   cluster_full_name = "ip-recorder-us-east-1.k8s.local"
-  kube_config_path  = pathexpand("./${local.cluster_full_name}.config")
+  kube_config_path_base  = pathexpand("~")
   aws_region        = "us-east-1"
   bucket            = "ip-recorder-state"
   cluster_name      = "ip-recorder"
@@ -23,19 +23,19 @@ inputs = {
 
 generate "provider" {
   path      = "provider.tf"
-  if_exists = "overwrite_terragrunt"
+  if_exists = "skip"
   contents  = <<EOF
 provider "aws" {
   region = "${local.aws_region}"
 }
 
 provider "kubernetes" {
-  # config_path = "${local.kube_config_path}"
+  config_path = "${local.kube_config_path_base}/.kube/eksctl/clusters/${local.cluster_name}"
 }
 
 provider "helm" {
   kubernetes {
-    config_path = "${local.kube_config_path}"
+  config_path = "${local.kube_config_path_base}/.kube/eksctl/clusters/${local.cluster_name}"
   }
 }
 EOF

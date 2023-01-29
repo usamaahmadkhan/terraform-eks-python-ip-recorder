@@ -1,22 +1,19 @@
-resource "helm_release" "ingress-nginx" {
-  name = "ingress-nginx"
-  repository = "https://kubernetes.github.io/ingress-nginx"
-  chart = "ingress-nginx"
-  namespace = "kube-system"
-  version = "4.2.3"
-  timeout = 300
-
-  values = [
-    "${file("./values.yaml")}"
-  ]
-
-  set {
-    name  = "cluster.enabled"
-    value = "true"
-  }
-
-  set {
-    name  = "metrics.enabled"
-    value = "true"
-  }
+locals {
+  env_vars = read_terragrunt_config("${get_path_to_repo_root()}//terragrunt")  
 }
+
+remote_state {
+  generate = {
+    path      = "backend.tf"
+    if_exists = "overwrite_terragrunt"
+  }
+  backend = local.env_vars.remote_state.backend
+  config = merge(
+    local.env_vars.remote_state.config,
+    {
+      key = "${local.env_vars.locals.cluster_full_name}/${basename(get_repo_root())}/${get_path_from_repo_root()}/terraform.tfstate"
+    },
+  )
+}
+
+generate = local.env_vars.generate
