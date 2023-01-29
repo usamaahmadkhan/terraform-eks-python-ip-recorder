@@ -20,6 +20,9 @@ inputs = {
   enable_nat_gateway = true
   enable_vpn_gateway = false
 
+  enable_dns_hostnames = true
+  enable_dns_support   = true
+
   private_subnet_tags = {
     "Tier"                                                          = "Private"
     "kubernetes.io/role/internal-elb"                             = 1
