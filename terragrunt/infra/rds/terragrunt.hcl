@@ -10,6 +10,10 @@ dependency "vpc" {
   config_path = "${get_path_to_repo_root()}//terragrunt/infra/vpc"
 }
 
+dependency "eks" {
+  config_path = "${get_path_to_repo_root()}//terragrunt/infra/eks"
+}
+
 
 inputs = {
   
@@ -28,14 +32,8 @@ inputs = {
   
   iam_database_authentication_enabled = true
 
-  vpc_security_group_ids = [dependency.vpc.outputs.default_security_group_id]
-
-
-  # Enhanced Monitoring - see example for details on how to create the role
-  # by yourself, in case you don't want to create it automatically
-  monitoring_interval = "30"
-  monitoring_role_name = "MyRDSMonitoringRole"
-  create_monitoring_role = true
+  db_subnet_group_name = dependency.vpc.outputs.database_subnet_group_name
+  vpc_security_group_ids = [dependency.vpc.outputs.default_security_group_id, dependency.eks.outputs.node_security_group_id]
 
   tags = {
     Terraform   = "true"
@@ -43,7 +41,7 @@ inputs = {
   }
 
   # DB subnet group
-  create_db_subnet_group = true
+  create_db_subnet_group = false
   subnet_ids             = dependency.vpc.outputs.database_subnets
 
   # DB parameter group

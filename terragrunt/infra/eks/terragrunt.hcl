@@ -23,14 +23,14 @@ inputs = {
 
   # EKS Managed Node Group(s)
   eks_managed_node_group_defaults = {
-    instance_types = ["t2.micro"]
+    instance_types = ["t2.micro", "t2.medium"]
   }
 
   eks_managed_node_groups = {
     apps = {
       min_size     = 1
-      max_size     = 1
-      desired_size = 1
+      max_size     = 2
+      desired_size = 2
 
       instance_types = ["t2.micro"]
       capacity_type  = "SPOT"
@@ -54,9 +54,9 @@ inputs = {
   }
 }
 
-generate "k8s-provider" {
+generate "k8-provider" {
   path      = "provider.tf"
-  if_exists = "overwrite_terragrunt"
+  if_exists = "overwrite"
   contents = <<EOF
 provider "kubernetes" {
   host                   = aws_eks_cluster.this[0].endpoint
