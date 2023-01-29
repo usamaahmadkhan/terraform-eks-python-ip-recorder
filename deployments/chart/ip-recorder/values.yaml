@@ -38,7 +38,7 @@ securityContext: {}
 
 env:
   - name: DB_HOST
-    value: "mysql.rds.com"
+    value: "ip-recorder-db.c4clkutr9ehs.us-east-1.rds.amazonaws.com"
   - name: DB_PORT
     value: "3306"
   - name: DB_USER

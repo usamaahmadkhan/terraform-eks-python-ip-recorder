@@ -1,19 +1,23 @@
 .PHONY: default build builder-image binary-image test stop clean-images clean push apply deploy release release-all manifest push clean-image
 
-REGISTRY ?= docker.io
-DOCKER_IMAGE ?= usamaahmadkhan/ip-recorder
+REGISTRY ?= 217104054449.dkr.ecr.us-east-1.amazonaws.com
+DOCKER_IMAGE ?= ip-recorder
 
 # Default value "dev"
-DOCKER_TAG ?= dev
-REPOSITORY_DOCKER_TAG = ${REGISTRY}/${DOCKER_IMAGE}:${DOCKER_TAG}
-
 VERSION ?= 0.0.1
+REPOSITORY_DOCKER_TAG = ${REGISTRY}/${DOCKER_IMAGE}:${VERSION}
+
+
+login:
+	aws ecr get-login-password --region us-east-1 | docker login  --username AWS --password-stdin ${REGISTRY}
 
 build:
 	docker build -t "${REPOSITORY_DOCKER_TAG}" .
 
 push:
 	docker push ${REPOSITORY_DOCKER_TAG}
+
+build-push: build push
 
 apply:
 	kubectl create ns temp-ip-recorder || kubectl kubectl apply -f deployments/manifests/ -n temp-ip-recorder
