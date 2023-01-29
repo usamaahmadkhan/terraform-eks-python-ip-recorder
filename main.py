@@ -7,7 +7,7 @@ app = Flask(__name__, template_folder='html/')
 
 PORT = getenv("PORT", "8080")
 DB_HOST = getenv("DB_HOST", "mysql")
-DB_PORT = getenv("DB_PORT", 3306)
+DB_PORT = int(getenv("DB_PORT", 3306))
 DB_USER = getenv("DB_USER", "user")
 DB_PASSWORD = getenv("DB_PASSWORD", "password")
 DB_NAME = getenv("DB_NAME", "ips")
