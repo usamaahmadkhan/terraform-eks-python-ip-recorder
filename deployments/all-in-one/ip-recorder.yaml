@@ -5,10 +5,10 @@ kind: ServiceAccount
 metadata:
   name: ip-recorder
   labels:
-    helm.sh/chart: ip-recorder-v0.0.1
+    helm.sh/chart: ip-recorder-v0.0.2
     app.kubernetes.io/name: ip-recorder
     app.kubernetes.io/instance: ip-recorder
-    app.kubernetes.io/version: "v0.0.1"
+    app.kubernetes.io/version: "v0.0.2"
     app.kubernetes.io/managed-by: Helm
 ---
 # Source: ip-recorder/templates/service.yaml
@@ -17,10 +17,10 @@ kind: Service
 metadata:
   name: ip-recorder
   labels:
-    helm.sh/chart: ip-recorder-v0.0.1
+    helm.sh/chart: ip-recorder-v0.0.2
     app.kubernetes.io/name: ip-recorder
     app.kubernetes.io/instance: ip-recorder
-    app.kubernetes.io/version: "v0.0.1"
+    app.kubernetes.io/version: "v0.0.2"
     app.kubernetes.io/managed-by: Helm
 spec:
   type: ClusterIP
@@ -39,10 +39,10 @@ kind: Deployment
 metadata:
   name: ip-recorder
   labels:
-    helm.sh/chart: ip-recorder-v0.0.1
+    helm.sh/chart: ip-recorder-v0.0.2
     app.kubernetes.io/name: ip-recorder
     app.kubernetes.io/instance: ip-recorder
-    app.kubernetes.io/version: "v0.0.1"
+    app.kubernetes.io/version: "v0.0.2"
     app.kubernetes.io/managed-by: Helm
 spec:
   replicas: 1
@@ -63,11 +63,11 @@ spec:
         - name: ip-recorder
           securityContext:
             {}
-          image: "docker.io/usamaahmadkhan/ip-recorder:v0.0.1"
+          image: "217104054449.dkr.ecr.us-east-1.amazonaws.com/ip-recorder:v0.0.2"
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
-              containerPort: 
+              containerPort: 8080
               protocol: TCP
           livenessProbe:
             httpGet:
@@ -79,41 +79,47 @@ spec:
               port: http
           env:
             - name: PORT
-              value: 8080
+              value: "8080"
             
             - name: DB_HOST
-              value: mysql.rds.com
+              value: ip-recorder-db.c4clkutr9ehs.us-east-1.rds.amazonaws.com
             - name: DB_PORT
               value: "3306"
             - name: DB_USER
               value: user
             - name: DB_PASSWORD
               valueFrom:
-                secretRef:
+                secretKeyRef:
                   key: password
                   name: db-password
             - name: DB_NAME
               value: ips
           resources:
-            {}
+            requests:
+              cpu: 10m
+              memory: 64Mi
 ---
-# Source: ip-recorder/templates/tests/test-connection.yaml
-apiVersion: v1
-kind: Pod
+# Source: ip-recorder/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
 metadata:
-  name: "ip-recorder-test-connection"
+  name: ip-recorder
   labels:
-    helm.sh/chart: ip-recorder-v0.0.1
+    helm.sh/chart: ip-recorder-v0.0.2
     app.kubernetes.io/name: ip-recorder
     app.kubernetes.io/instance: ip-recorder
-    app.kubernetes.io/version: "v0.0.1"
+    app.kubernetes.io/version: "v0.0.2"
     app.kubernetes.io/managed-by: Helm
-  annotations:
-    "helm.sh/hook": test
 spec:
-  containers:
-    - name: wget
-      image: busybox
-      command: ['wget']
-      args: ['ip-recorder:80']
-  restartPolicy: Never
+  ingressClassName: nginx
+  rules:
+    - host: "ac612c663916c47f3b2395e1e278d2a7-a05ecd19916a924c.elb.us-east-1.amazonaws.com"
+      http:
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: ip-recorder
+                port:
+                  number: 80
