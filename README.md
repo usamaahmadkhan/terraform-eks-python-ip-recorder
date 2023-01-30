@@ -18,20 +18,29 @@ A Simple Python flask server that implements two endpoints.
 
 ## Quick Start
 
+### Bring Up whole Infra
 ```
-# Bring Up whole Infra
 make infra-up
+```
 
-# Find ECR URL and replace in Makefile
+### Find ECR URL and replace in Makefile
+```
 cd terragrunt/infra/ecr; terragrunt output repository_url
+```
 
-# Build and Push the image
+### Build and Push the image
+```
 make build-push
+```
 
-# Export KUBE CONFIG
+### Export KUBE CONFIG
+
+```
 export KUBECONFIG=$HOME/.kube/eksctl/clusters/<name>
+```
 
-# Update values in chart/ip-recorder/values.yaml file
+### Update values in chart/ip-recorder/values.yaml file
+```
 # e.g. 1. image.repository
 #      2. image.tag
 #      3. env.DB_HOST
@@ -39,22 +48,30 @@ export KUBECONFIG=$HOME/.kube/eksctl/clusters/<name>
 #      5. env.DB_PASSWORD (Secret will be created in the next steps )
 #      6. ingress.className (should be "nginx")
 #      6. ingress.hosts.host (kubectl get svc ingress-nginx-controller -n nginx-ingress -ojson | jq -r .status.loadBalancer.ingress[0].hostname)
+```
 
-# Deploy Application
+### Deploy Application
+```
 make manifests
 make apply
+```
 
-# Find RDS Instance Password and create db-password
+### Find RDS Instance Password and create db-password
+```
 PASSWORD=$(cd terragrunt/infra/rds; terragrunt output db_instance_password | jq -r )
 kubectl create secret generic db-password --from-literal=password=$PASSWORD -n <NAMESPACE>
+```
 
-# Record IP 
+### Record IP 
+```
 HOSTNAME=$(kubectl get svc ingress-nginx-controller -n nginx-ingress -ojson | jq -r .status.loadBalancer.ingress[0].hostname)
 curl http://$HOSTNAME/client-ip
+```
+### List IPs 
 
-# List IPs 
+```
+
 curl http://$HOSTNAME/client-ip/list
-
 ```
 ### Browser /client-ip Endpoint
 ![](./images/public-ip.png)
