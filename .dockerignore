@@ -1,1 +1,3 @@
 terragrunt/
+deployments/
+images/

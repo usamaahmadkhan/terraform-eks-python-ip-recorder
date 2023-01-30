@@ -1,5 +1,10 @@
 # IP-Recorder Application using EKS/RDS
 
+A Simple Python flask server that implements two endpoints.
+
+- `/client-ip` Records Public IP of the user and store it in the RDS database
+- `/client-ip/list` Queries the RDS database and displays on a table
+
 ## Pre-requisites
 - `terraform`
 - `terragrunt`
@@ -9,6 +14,7 @@
 - `helm`
 - `docker`
 - `docker-compose`
+- `make`
 
 ## Quick Start
 
@@ -42,8 +48,19 @@ make apply
 PASSWORD=$(cd terragrunt/infra/rds; terragrunt output db_instance_password | jq -r )
 kubectl create secret generic db-password --from-literal=password=$PASSWORD -n <NAMESPACE>
 
+# Record IP 
+HOSTNAME=$(kubectl get svc ingress-nginx-controller -n nginx-ingress -ojson | jq -r .status.loadBalancer.ingress[0].hostname)
+curl http://$HOSTNAME/client-ip
+
+# List IPs 
+curl http://$HOSTNAME/client-ip/list
 
 ```
+### Browser /client-ip Endpoint
+![](./images/public-ip.png)
+### Browser /client-ip/list Endpoint
+![](./images/ip-list.png)
+
 ## Directory Structure
 
 `deployments/chart` contains Helm chart for ip-recorder app
@@ -90,7 +107,6 @@ kubectl create secret generic db-password --from-literal=password=$PASSWORD -n <
     │   │   └── terragrunt.hcl
     │   ├── nginx-ingress
     │   │   ├── backend.tf
-    │   │   ├── errored.tfstate
     │   │   ├── helm-chart.tf
     │   │   ├── provider.tf
     │   │   ├── terragrunt.hcl
@@ -114,21 +130,7 @@ kubectl create secret generic db-password --from-literal=password=$PASSWORD -n <
         └── vpc
             └── terragrunt.hcl
 ```
-##
-
-TODOS:
-- Separate out ECR IAMs . Now access for only `Administrator` group. Make separate Admin group with IAM users and separate RBAC for EKS Admins
-
-
-Why a public endpoint access is enabled for EKS?
-
-## Infrastructure
-
-Pre-requisites:
-- `terraform`
-- `terragrunt`
-- `awscli`
-- `eksctl`
+## Infrastructure Details
 
 ### Build Up Everything
 
@@ -145,20 +147,17 @@ make infra-up
 ```
 
 ### Tear Down
-```
+
 ```
 make infra-down
 ```
 
-```
-
 ## Running Locally
-
-Pre-requisites:
-- `make`
-- `docker-compose`
-- `docker`
 
 ```
 make run
 ```
+
+## TODOS:
+- Separate out ECR/RDS/EKS IAMs and Roles and use them appropriately. Now access for only `terraform-user`.
+- Make separate Admin group with IAM users and separate RBAC for EKS Admins and EKS Users
