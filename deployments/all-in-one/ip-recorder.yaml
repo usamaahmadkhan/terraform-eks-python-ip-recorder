@@ -5,10 +5,10 @@ kind: ServiceAccount
 metadata:
   name: ip-recorder
   labels:
-    helm.sh/chart: ip-recorder-v0.0.2
+    helm.sh/chart: ip-recorder-v0.0.4
     app.kubernetes.io/name: ip-recorder
     app.kubernetes.io/instance: ip-recorder
-    app.kubernetes.io/version: "v0.0.2"
+    app.kubernetes.io/version: "v0.0.4"
     app.kubernetes.io/managed-by: Helm
 ---
 # Source: ip-recorder/templates/service.yaml
@@ -17,10 +17,10 @@ kind: Service
 metadata:
   name: ip-recorder
   labels:
-    helm.sh/chart: ip-recorder-v0.0.2
+    helm.sh/chart: ip-recorder-v0.0.4
     app.kubernetes.io/name: ip-recorder
     app.kubernetes.io/instance: ip-recorder
-    app.kubernetes.io/version: "v0.0.2"
+    app.kubernetes.io/version: "v0.0.4"
     app.kubernetes.io/managed-by: Helm
 spec:
   type: ClusterIP
@@ -39,10 +39,10 @@ kind: Deployment
 metadata:
   name: ip-recorder
   labels:
-    helm.sh/chart: ip-recorder-v0.0.2
+    helm.sh/chart: ip-recorder-v0.0.4
     app.kubernetes.io/name: ip-recorder
     app.kubernetes.io/instance: ip-recorder
-    app.kubernetes.io/version: "v0.0.2"
+    app.kubernetes.io/version: "v0.0.4"
     app.kubernetes.io/managed-by: Helm
 spec:
   replicas: 1
@@ -63,7 +63,7 @@ spec:
         - name: ip-recorder
           securityContext:
             {}
-          image: "217104054449.dkr.ecr.us-east-1.amazonaws.com/ip-recorder:v0.0.2"
+          image: "217104054449.dkr.ecr.us-east-1.amazonaws.com/ip-recorder:v0.0.4"
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
@@ -105,15 +105,15 @@ kind: Ingress
 metadata:
   name: ip-recorder
   labels:
-    helm.sh/chart: ip-recorder-v0.0.2
+    helm.sh/chart: ip-recorder-v0.0.4
     app.kubernetes.io/name: ip-recorder
     app.kubernetes.io/instance: ip-recorder
-    app.kubernetes.io/version: "v0.0.2"
+    app.kubernetes.io/version: "v0.0.4"
     app.kubernetes.io/managed-by: Helm
 spec:
   ingressClassName: nginx
   rules:
-    - host: "ac612c663916c47f3b2395e1e278d2a7-a05ecd19916a924c.elb.us-east-1.amazonaws.com"
+    - host: "a7c6c27f744cb468aab5313fb5526d9d-21a087e4cffc01fb.elb.us-east-1.amazonaws.com"
       http:
         paths:
           - path: /

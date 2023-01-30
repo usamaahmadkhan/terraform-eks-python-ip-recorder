@@ -8,7 +8,7 @@ image:
   repository: 217104054449.dkr.ecr.us-east-1.amazonaws.com/ip-recorder
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: v0.0.2
+  tag: v0.0.4
 
 imagePullSecrets: []
 nameOverride: ""
@@ -62,7 +62,7 @@ ingress:
   className: "nginx"
   annotations: 
   hosts:
-    - host: ac612c663916c47f3b2395e1e278d2a7-a05ecd19916a924c.elb.us-east-1.amazonaws.com
+    - host: a7c6c27f744cb468aab5313fb5526d9d-21a087e4cffc01fb.elb.us-east-1.amazonaws.com
       paths:
         - path: /
           pathType: ImplementationSpecific

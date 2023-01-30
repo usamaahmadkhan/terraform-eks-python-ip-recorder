@@ -1,5 +1,14 @@
 # IP-Recorder Application using EKS/RDS
 
+## Pre-requisites
+- `terraform`
+- `terragrunt`
+- `awscli`
+- `eksctl`
+- `jq`
+- `helm`
+- `docker`
+- `docker-compose`
 
 ## Quick Start
 
@@ -13,14 +22,26 @@ cd terragrunt/infra/ecr; terragrunt output repository_url
 # Build and Push the image
 make build-push
 
-# Find Postgres Password and create db-password
-PASSWORD=$(cd terragrunt/infra/rds; terragrunt output db_instance_password)
-kubectl create secret generic --from-literal=$(PASSWORD) -n <NAMESPACE>
+# Export KUBE CONFIG
+export KUBECONFIG=$HOME/.kube/eksctl/clusters/<name>
 
-# Build and Push the image
-make build-push
+# Update values in chart/ip-recorder/values.yaml file
+# e.g. 1. image.repository
+#      2. image.tag
+#      3. env.DB_HOST
+#      4. env.DB_PORT
+#      5. env.DB_PASSWORD (Secret will be created in the next steps )
+#      6. ingress.className (should be "nginx")
+#      6. ingress.hosts.host (kubectl get svc ingress-nginx-controller -n nginx-ingress -ojson | jq -r .status.loadBalancer.ingress[0].hostname)
 
-# 
+# Deploy Application
+make manifests
+make apply
+
+# Find RDS Instance Password and create db-password
+PASSWORD=$(cd terragrunt/infra/rds; terragrunt output db_instance_password | jq -r )
+kubectl create secret generic db-password --from-literal=password=$PASSWORD -n <NAMESPACE>
+
 
 ```
 ## Directory Structure
@@ -46,9 +67,7 @@ make build-push
 │           │   ├── ingress.yaml
 │           │   ├── NOTES.txt
 │           │   ├── serviceaccount.yaml
-│           │   ├── service.yaml
-│           │   └── tests
-│           │       └── test-connection.yaml
+│           │   └── service.yaml
 │           └── values.yaml
 ├── docker-compose.yml
 ├── Dockerfile
@@ -57,13 +76,13 @@ make build-push
 │   └── list.html
 ├── main.py
 ├── Makefile
-├── REAME.md
+├── README.md
 ├── requirements.txt
 └── terragrunt
-    ├── backend.tf
     ├── infra
     │   ├── aws-lb-controller
     │   │   └── terragrunt.hcl
+    │   ├── backend.tf
     │   ├── ecr
     │   │   └── terragrunt.hcl
     │   ├── eks
@@ -71,28 +90,29 @@ make build-push
     │   │   └── terragrunt.hcl
     │   ├── nginx-ingress
     │   │   ├── backend.tf
+    │   │   ├── errored.tfstate
     │   │   ├── helm-chart.tf
     │   │   ├── provider.tf
     │   │   ├── terragrunt.hcl
     │   │   └── values.yaml
+    │   ├── provider.tf
     │   ├── rds
     │   │   └── terragrunt.hcl
+    │   ├── terragrunt.hcl
     │   └── vpc
     │       └── terragrunt.hcl
-    ├── modules
-    │   ├── aws-lb-controller
-    │   │   ├── terragrunt.hcl
-    │   │   └── variables.tf
-    │   ├── ecr
-    │   │   └── terragrunt.hcl
-    │   ├── eks
-    │   │   └── terragrunt.hcl
-    │   ├── rds
-    │   │   └── terragrunt.hcl
-    │   └── vpc
-    │       └── terragrunt.hcl
-    ├── provider.tf
-    └── terragrunt.hcl
+    └── modules
+        ├── aws-lb-controller
+        │   ├── terragrunt.hcl
+        │   └── variables.tf
+        ├── ecr
+        │   └── terragrunt.hcl
+        ├── eks
+        │   └── terragrunt.hcl
+        ├── rds
+        │   └── terragrunt.hcl
+        └── vpc
+            └── terragrunt.hcl
 ```
 ##
 
