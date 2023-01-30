@@ -3,7 +3,7 @@ include "aws-lb-controller" {
 }
 
 locals {
-  env_vars = read_terragrunt_config("${get_path_to_repo_root()}//terragrunt")  
+  env_vars = read_terragrunt_config("${get_path_to_repo_root()}//terragrunt/infra")  
 }
 
 dependency "vpc" {
@@ -62,6 +62,11 @@ resource "helm_release" "lb" {
   depends_on = [
     kubernetes_service_account.service-account
   ]
+
+  set {
+    name  = "replicaCount"
+    value = 2
+  }
 
   set {
     name  = "serviceAccount.create"

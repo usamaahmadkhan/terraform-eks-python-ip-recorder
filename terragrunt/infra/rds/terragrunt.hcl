@@ -3,7 +3,7 @@ include "rds" {
 }
 
 locals {
-  env_vars = read_terragrunt_config("${get_path_to_repo_root()}//terragrunt")
+  env_vars = read_terragrunt_config("${get_path_to_repo_root()}//terragrunt/infra")
 }
 
 dependency "vpc" {
@@ -51,7 +51,7 @@ inputs = {
   major_engine_version = "5.7"
 
   # Database Deletion Protection
-  deletion_protection = true
+  deletion_protection = false
 
 }
 

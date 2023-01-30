@@ -3,7 +3,7 @@ include "ecr" {
 }
 
 locals {
-  env_vars = read_terragrunt_config("${get_path_to_repo_root()}//terragrunt")
+  env_vars = read_terragrunt_config("${get_path_to_repo_root()}//terragrunt/infra")
 }
 
 inputs = {
@@ -11,8 +11,25 @@ inputs = {
   repository_name = local.env_vars.locals.ecr_repo_name
 
 
-  repository_read_write_access_arns = ["arn:aws:iam::${local.env_vars.locals.account_id}:group/Administrators"]
+  # repository_read_write_access_arns = ["arn:aws:iam::${local.env_vars.locals.account_id}:group/Administrators"]
   repository_image_tag_mutability = "IMMUTABLE"
+  repository_lifecycle_policy = jsonencode({
+    rules = [
+      {
+        rulePriority = 1,
+        description  = "Keep last 30 images",
+        selection = {
+          tagStatus     = "tagged",
+          tagPrefixList = ["v"],
+          countType     = "imageCountMoreThan",
+          countNumber   = 30
+        },
+        action = {
+          type = "expire"
+        }
+      }
+    ]
+  })
   repository_image_scan_on_push = true
   repository_encryption_type = "AES256"
   tags = {

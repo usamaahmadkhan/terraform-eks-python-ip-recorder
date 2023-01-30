@@ -3,7 +3,7 @@ include "eks" {
 }
 
 locals {
-  env_vars = read_terragrunt_config("${get_path_to_repo_root()}//terragrunt")
+  env_vars = read_terragrunt_config("${get_path_to_repo_root()}//terragrunt/infra")
 }
 
 dependency "vpc" {
@@ -14,7 +14,7 @@ inputs = {
   cluster_version = local.env_vars.locals.cluster_version
   cluster_name    = local.env_vars.locals.cluster_name
   vpc_id          = dependency.vpc.outputs.vpc_id
-  subnet_ids      = dependency.vpc.outputs.private_subnets
+  subnet_ids      = dependency.vpc.outputs.public_subnets
 
   cluster_endpoint_public_access = true
   cluster_endpoint_private_access = true
@@ -29,8 +29,8 @@ inputs = {
   eks_managed_node_groups = {
     apps = {
       min_size     = 1
-      max_size     = 2
-      desired_size = 2
+      max_size     = 4
+      desired_size = 4
 
       instance_types = ["t2.micro"]
       capacity_type  = "SPOT"
@@ -46,7 +46,7 @@ inputs = {
   ]
 
   create_aws_auth_configmap = true
-  manage_aws_auth_configmap = true
+  manage_aws_auth_configmap = false
   
   tags = {
     Environment = "dev"
@@ -68,6 +68,20 @@ provider "kubernetes" {
   }
 }
 EOF
+}
+
+terraform {
+  after_hook "terragrunt-read-config" {
+    commands = ["apply"]
+    execute  = ["bash", "./script.sh"]
+  }
+  extra_arguments "set_env" {
+    commands = ["apply"]
+    env_vars = {
+      KUBECONFIG_PATH = "${local.env_vars.locals.kube_config_path_base}/.kube/eksctl/clusters/${local.env_vars.locals.cluster_name}"
+      CLUSTER_NAME = local.env_vars.locals.cluster_name
+    }
+  }
 }
 
 remote_state {

@@ -1,5 +1,13 @@
 locals {
-  env_vars = read_terragrunt_config("${get_path_to_repo_root()}//terragrunt")  
+  env_vars = read_terragrunt_config("${get_path_to_repo_root()}//terragrunt/infra")  
+}
+
+dependency "eks" {
+  config_path = "${get_path_to_repo_root()}//terragrunt/infra/eks"
+}
+
+dependency "aws-lb-controller" {
+  config_path = "${get_path_to_repo_root()}//terragrunt/infra/eks"
 }
 
 remote_state {

@@ -23,11 +23,6 @@ resource "helm_release" "ingress-nginx" {
 
 resource "kubernetes_namespace" "nginx-ingress-ns" {
   metadata {
-
-    labels = {
-      mylabel = "label-value"
-    }
-
     name = "nginx-ingress"
   }
 }

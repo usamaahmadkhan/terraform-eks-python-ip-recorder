@@ -3,7 +3,7 @@ include "vpc" {
 }
 
 locals {
-  env_vars = read_terragrunt_config("${get_path_to_repo_root()}//terragrunt")
+  env_vars = read_terragrunt_config("${get_path_to_repo_root()}//terragrunt/infra")
 }
 
 inputs = {
