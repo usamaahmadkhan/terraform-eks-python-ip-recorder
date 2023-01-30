@@ -1,24 +1,29 @@
 .PHONY: default login build push build-push apply purge deploy manifests bump-chart run infra-up infra-down
 
-REGISTRY ?= 217104054449.dkr.ecr.us-east-1.amazonaws.com  # cd terragrunt/infra/ecr; terragrunt output repository_url
+# cd terragrunt/infra/ecr; terragrunt output repository_url
+REGISTRY ?= 217104054449.dkr.ecr.us-east-1.amazonaws.com
 DOCKER_IMAGE ?= ip-recorder
 NAMESPACE = ip-recorder
 
 # Default value "dev"
-VERSION ?= 0.0.2
+VERSION ?= 0.0.4
 REPOSITORY_DOCKER_TAG = ${REGISTRY}/${DOCKER_IMAGE}:v${VERSION}
 
+ENVIRONMENT ?= infra 	# When multiple use dev, qa, prod etc. 
 
+# Login to Image registry
 login:
 	aws ecr get-login-password --region us-east-1 | docker login  --username AWS --password-stdin ${REGISTRY}
 
+# Build code locally
 build:
 	docker build -t "${REPOSITORY_DOCKER_TAG}" .
 
+# Push to Image registry
 push:
 	docker push ${REPOSITORY_DOCKER_TAG}
 
-# Push to Registry
+# Build and Push to Registry
 build-push: login build push
 
 # Apply on live cluster
@@ -47,3 +52,13 @@ bump-chart:
 # Run locally
 run:
 	docker-compose up --build
+
+# Bring up everything
+infra-up:
+	cd terragrunt/${ENVIRONMENT} && \
+	terragrunt run-all apply
+
+# Bring down everything
+infra-down:
+	cd terragrunt/${ENVIRONMENT} && \
+	terragrunt run-all destroy
