@@ -30,7 +30,7 @@ def redirect_to():
 @app.route('/client-ip/', methods = ['GET'])
 @app.route('/client-ip', methods = ['GET'])
 def record_client_ip():
-    clientip = request.remote_addr
+    clientip = request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr)
     query = "INSERT INTO iplist(id, ip) values('%s', '%s')" % (0, clientip)
     cursor.execute(query)
     db.commit()
