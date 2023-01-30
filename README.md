@@ -18,7 +18,7 @@ A Simple Python flask server that implements two endpoints.
 
 ## Quick Start
 
-### Bring Up whole Infra
+### Bring UP infra
 ```
 make infra-up
 ```
@@ -33,7 +33,7 @@ cd terragrunt/infra/ecr; terragrunt output repository_url
 make build-push
 ```
 
-### Export KUBE CONFIG
+### Export KUBECONFIG
 
 ```
 export KUBECONFIG=$HOME/.kube/eksctl/clusters/<name>
@@ -82,7 +82,9 @@ curl http://$HOSTNAME/client-ip/list
 
 `deployments/chart` contains Helm chart for ip-recorder app
 `deployments/all-in-one` contains single file templated from the helm chart for easy apply
-`terragrunt/` contains Infrastructure modules for VPC/EKS/RDS etc. along with Nginx-ingress-controller and AWS Load Balancer Controller 
+`terragrunt/`  
+`terragrunt/modules` contains Infrastructure modules referenced to <https://registry.terraform.io>
+`terragrunt/infra` contains inputs for modules and env related values
 
 
 ```
@@ -178,3 +180,5 @@ make run
 ## TODOS:
 - Separate out ECR/RDS/EKS IAMs and Roles and use them appropriately. Now access for only `terraform-user`.
 - Make separate Admin group with IAM users and separate RBAC for EKS Admins and EKS Users
+- Include Architecture Diagram
+- Use `terragrunt/dev/`,`terragrunt/prod/`,`terragrunt/qa/` etc. dirs instead of `terragrunt/infra` for environment specific dirs.
